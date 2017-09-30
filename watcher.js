@@ -7,14 +7,17 @@ function int(x) {
 }
 
 /* Updates the memory infrmation held in the data array by doing an ajax query to the API. */
-function updateMem(){
+function updateData(toUpdate){
+  var args = "";
+  for(var i=0; i<toUpdate.length; i++) args += toUpdate[i] + '&';
   var request = new XMLHttpRequest();
-  request.open('get', 'api.php?mem');
+  request.open('get', 'api.php?' + args);
   request.onreadystatechange = function () {
     if (request.readyState === 4) {
       if (request.status === 200) {
-        console.log(request.responseText);
-        data['mem'] =JSON.parse(request.responseText)['mem'];
+        var response = JSON.parse(request.responseText)
+        data['mem'] = response['mem'];
+        if('mem' in response) data['mem'] = response['mem'];
       } else {
           console.log('Failed to communicate with API to get memory information: ' + request.status);
       }
@@ -25,8 +28,10 @@ function updateMem(){
 
 /* Updates the pages componments and updates the needed data */
 function update(){
-  ramwatchers = document.getElementsByClassName("ram-watcher")
-  if(ramwatchers.length > 0) updateMem();
+  var toUpdate = [];
+  var ramwatchers = document.getElementsByClassName("ram-watcher")
+  if(ramwatchers.length > 0) toUpdate.push('mem');
+  if(toUpdate.length > 0) updateData(toUpdate);
   var mem = data['mem'];
   var ramTotal = mem['MemTotal'];
   var ramFree = mem['MemFree'];
@@ -34,7 +39,7 @@ function update(){
   for(var i = 0; i<ramwatchers.length; i++){
     watcher = ramwatchers[i];
     watcher.getElementsByClassName("memometre-text")[0].textContent = int(ramUsage);
-    drawJauge(watcher.getElementsByClassName("memometre-jauge")[0], int(ramUsage), 80);
+    drawGauge(watcher.getElementsByClassName("memometre-jauge")[0], int(ramUsage), 80);
   }
 }
 
@@ -65,9 +70,10 @@ function drawGauge(canv, x, high){
 
 /* Everytghing is in the name */
 function setup(){
-  console.log("Setting up!")
-  ramwatchers = document.getElementsByClassName("ram-watcher")
-  if(ramwatchers.length > 0) updateMem();
+  var toUpdate = [];
+  var ramwatchers = document.getElementsByClassName("ram-watcher")
+  if(ramwatchers.length > 0) toUpdate.push('mem');
+  if(toUpdate.length > 0) updateData(toUpdate);
   for(var i = 0; i<ramwatchers.length; i++){
     watcher = ramwatchers[i]
     watcher.innerHTML += "<canvas width=\"200\" height=\"200\" class=\"memometre-jauge\"></canvas>"
