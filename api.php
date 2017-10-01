@@ -14,7 +14,7 @@
         $val = explode(' ', $val)[0];
         $val *= 1024;
       }else{
-        $val *= 1;
+        $val = (int) $val;
       }
       $meminfo[$key] = $val;
     }
@@ -27,21 +27,16 @@
     feel free to submit a PR if you eyes are bleeding. */
     $swapinfo = array();
     $data = explode("\n", file_get_contents("/proc/swaps"));
-    $firstline = $data[0];
-    $firstline = str_replace("\t", " ", $firstline);
-    $firstline = explode(" ", $firstline);
-    $firstline = array_filter($firstline);
-    $tmp = array(); //This is necessary as the array will still have the indexes otherwise...
+    $firstline = array_filter(explode(" ", str_replace("\t", " ", $data[0])));
+    $tmp = array(); //This seems necessary as the array will still have the indexes otherwise...
     foreach ($firstline as $key => $value) {array_push($tmp, $value);}
     $firstline = $tmp;
     unset($tmp);
     $data = array_splice($data, 1, count($data) - 2);
     foreach($data as $line){
       $el = array();
-      $line = str_replace("\t", " ", $line);
-      $line = explode(" ", $line);
-      $line = array_filter($line);
-      $tmp = array(); //This is necessary as the array will still have the indexes otherwise...
+      $line = array_filter(explode(" ", str_replace("\t", " ", $line)));
+      $tmp = array(); //This seems necessary as the array will still have the indexes otherwise...
       foreach ($line as $key => $value) {array_push($tmp, $value);}
       $line = $tmp;
       unset($tmp);

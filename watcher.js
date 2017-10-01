@@ -6,7 +6,7 @@ function int(x) {
     return Math[this < 0 ? 'ceil' : 'floor'](x);
 }
 
-/* Updates the memory infrmation held in the data array by doing an ajax query to the API. */
+/* Updates the memory information held in the data array by doing an ajax query to the API. */
 function updateData(){
   var toUpdate = [];
   var ramwatchers = document.getElementsByClassName("ram-watcher")
@@ -35,6 +35,7 @@ function updateData(){
 function update(){
   updateData();
   /** The different watchers on the page */
+  //TODO This things need to change to use the same gauge class and have a dedicated data tag
   var ramwatchers = document.getElementsByClassName("ram-watcher")
   var swapwatchers = document.getElementsByClassName("swap-watcher")
 
@@ -43,7 +44,7 @@ function update(){
   var ramTotal = mem['MemTotal'];
   var ramFree = mem['MemFree'];
   var ramUsage = (ramTotal - ramFree) / ramTotal * 100
-  var swap = data['swap'][0]; //TODO Support multiple swaps
+  var swap = data['swap'][0];                                         //TODO Support multiple swaps
   var swapTotal = swap['Size'];
   var swapUsed = swap['Used'];
   if(swapUsed < 0) swapUsed = 0;
