@@ -7,7 +7,12 @@ function int(x) {
 }
 
 /* Updates the memory infrmation held in the data array by doing an ajax query to the API. */
-function updateData(toUpdate){
+function updateData(){
+  var toUpdate = [];
+  var ramwatchers = document.getElementsByClassName("ram-watcher")
+  var swapwatchers = document.getElementsByClassName("swap-watcher")
+  if(ramwatchers.length > 0) toUpdate.push('mem');
+  if(swapwatchers.length > 0) toUpdate.push('swap');
   var args = "";
   for(var i=0; i<toUpdate.length; i++) args += toUpdate[i] + '&';
   var request = new XMLHttpRequest();
@@ -16,8 +21,8 @@ function updateData(toUpdate){
     if (request.readyState === 4) {
       if (request.status === 200) {
         var response = JSON.parse(request.responseText)
-        data['mem'] = response['mem'];
         if('mem' in response) data['mem'] = response['mem'];
+        if('swap' in response) data['swap'] = response['swap'];
       } else {
           console.log('Failed to communicate with API to get memory information: ' + request.status);
       }
@@ -28,18 +33,31 @@ function updateData(toUpdate){
 
 /* Updates the pages componments and updates the needed data */
 function update(){
-  var toUpdate = [];
+  updateData();
+  /** The different watchers on the page */
   var ramwatchers = document.getElementsByClassName("ram-watcher")
-  if(ramwatchers.length > 0) toUpdate.push('mem');
-  if(toUpdate.length > 0) updateData(toUpdate);
+  var swapwatchers = document.getElementsByClassName("swap-watcher")
+
+  /* Data processing */
   var mem = data['mem'];
   var ramTotal = mem['MemTotal'];
   var ramFree = mem['MemFree'];
   var ramUsage = (ramTotal - ramFree) / ramTotal * 100
+  var swap = data['swap'][0]; //TODO Support multiple swaps
+  var swapTotal = swap['Size'];
+  var swapUsed = swap['Used'];
+  if(swapUsed < 0) swapUsed = 0;
+  var swapUsage = swapUsed / swapTotal * 100;
+
   for(var i = 0; i<ramwatchers.length; i++){
     watcher = ramwatchers[i];
     watcher.getElementsByClassName("memometre-text")[0].textContent = int(ramUsage);
     drawGauge(watcher.getElementsByClassName("memometre-jauge")[0], int(ramUsage), 80);
+  }
+  for(var i = 0; i<swapwatchers.length; i++){
+    watcher = swapwatchers[i];
+    watcher.getElementsByClassName("swapometre-text")[0].textContent = int(swapUsage);
+    drawGauge(watcher.getElementsByClassName("swapometre-jauge")[0], int(swapUsage), 80);
   }
 }
 
@@ -70,14 +88,18 @@ function drawGauge(canv, x, high){
 
 /* Everytghing is in the name */
 function setup(){
-  var toUpdate = [];
+  updateData();
   var ramwatchers = document.getElementsByClassName("ram-watcher")
-  if(ramwatchers.length > 0) toUpdate.push('mem');
-  if(toUpdate.length > 0) updateData(toUpdate);
+  var swapwatchers = document.getElementsByClassName("swap-watcher")
   for(var i = 0; i<ramwatchers.length; i++){
     watcher = ramwatchers[i]
     watcher.innerHTML += "<canvas width=\"200\" height=\"200\" class=\"memometre-jauge\"></canvas>"
     watcher.innerHTML += "</canvas><span class=\"memometre-text\"></span>"
+  }
+  for(var i = 0; i<swapwatchers.length; i++){
+    watcher = swapwatchers[i]
+    watcher.innerHTML += "<canvas width=\"200\" height=\"200\" class=\"swapometre-jauge\"></canvas>"
+    watcher.innerHTML += "</canvas><span class=\"swapometre-text\"></span>"
   }
 }
 

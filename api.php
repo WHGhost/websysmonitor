@@ -22,6 +22,37 @@
     return $meminfo;
   }
 
+  function getSwap(){
+    /* It can be made better, for sure, but I am still a php beginner,
+    feel free to submit a PR if you eyes are bleeding. */
+    $swapinfo = array();
+    $data = explode("\n", file_get_contents("/proc/swaps"));
+    $firstline = $data[0];
+    $firstline = str_replace("\t", " ", $firstline);
+    $firstline = explode(" ", $firstline);
+    $firstline = array_filter($firstline);
+    $tmp = array(); //This is necessary as the array will still have the indexes otherwise...
+    foreach ($firstline as $key => $value) {array_push($tmp, $value);}
+    $firstline = $tmp;
+    unset($tmp);
+    $data = array_splice($data, 1, count($data) - 2);
+    foreach($data as $line){
+      $el = array();
+      $line = str_replace("\t", " ", $line);
+      $line = explode(" ", $line);
+      $line = array_filter($line);
+      $tmp = array(); //This is necessary as the array will still have the indexes otherwise...
+      foreach ($line as $key => $value) {array_push($tmp, $value);}
+      $line = $tmp;
+      unset($tmp);
+      foreach($line as $key => $element){
+        $el[$firstline[$key]] = trim($element);
+      }
+      array_push($swapinfo, $el);
+    }
+    return  $swapinfo;
+  }
+
 
 
   $json = array();
@@ -29,6 +60,8 @@
 
     if($key === "mem"){
       $json['mem'] = getRam();
+    }else if($key === "swap"){
+      $json['swap'] = getSwap();
     }else{
       http_response_code(400);
       die();
