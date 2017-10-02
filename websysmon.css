@@ -1,8 +1,41 @@
-/* All temporary here */
-
 canvas{
   position: absolute;
-  z-index: -1;
+}
+
+body{
+  padding: 0px;
+  margin: 0px;
+  font-family: 'Didact Gothic';
+  background: #555555;
+}
+
+header{
+  text-align: center;
+  align-content: center;
+  background-color: #00AAAA;
+}
+
+h1{
+  padding: 20px;
+  margin: 0px;
+}
+.memory-box{
+  width: 400px;
+  height: 300px;
+  padding: 20px;
+  align-content: center;
+  display: inline-block;
+  border-style: solid;
+  border-color: #555555;
+  background-color: #FFFFFF;
+}
+
+.box-name{
+  font-size: 20px;
+  margin: 10px;
+  text-align: center;
+  background-color: #00BBBB;
+  padding:5px;
 }
 
 .ram-watcher{
@@ -20,7 +53,6 @@ canvas{
 .gauge-center-text{
   position: absolute;
   display: inline-block;
-  font-family: 'Didact Gothic';
   width: 200px;
   padding: 0px;
   margin-top: 66px;
@@ -33,7 +65,6 @@ canvas{
 .gauge-top-text{
   position: absolute;
   display: inline-block;
-  font-family: 'Didact Gothic';
   width: 200px;
   padding: 0px;
   margin-top: 45px;
@@ -46,7 +77,6 @@ canvas{
 .gauge-bottom-text{
   position: absolute;
   display: inline-block;
-  font-family: 'Didact Gothic';
   width: 200px;
   padding: 0px;
   margin-top: 130px;
@@ -54,4 +84,19 @@ canvas{
   font-weight: bold;
   text-align: center;
   align-content: center;
+}
+
+.gauge-name{
+  position: absolute;
+  display: inline-block;
+
+  width: 100px;
+  margin-left: 50px;
+  margin-right: 50px;
+  margin-top: 210px;
+  font-size: 25px;
+  font-weight: bold;
+  text-align: center;
+  align-content: center;
+  background-color: #00BBBB;
 }
