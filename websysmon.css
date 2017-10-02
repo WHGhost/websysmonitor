@@ -1,13 +1,57 @@
 /* All temporary here */
 
+canvas{
+  position: absolute;
+  z-index: -1;
+}
+
 .ram-watcher{
-  width: 100px;
-  height: 100px;
-  display: inline;
+  width: 200px;
+  height: 200px;
+  display: inline-block;
 }
 
 .swap-watcher{
-  width=100px;
-  height=100px;
+  width: 200px;
+  height: 200px;
   display: inline;
+}
+
+.gauge-center-text{
+  position: absolute;
+  display: inline-block;
+  font-family: 'Didact Gothic';
+  width: 200px;
+  padding: 0px;
+  margin-top: 66px;
+  font-size: 50px;
+  font-weight: bold;
+  text-align: center;
+  align-content: center;
+}
+
+.gauge-top-text{
+  position: absolute;
+  display: inline-block;
+  font-family: 'Didact Gothic';
+  width: 200px;
+  padding: 0px;
+  margin-top: 45px;
+  font-size: 20px;
+  font-weight: bold;
+  text-align: center;
+  align-content: center;
+}
+
+.gauge-bottom-text{
+  position: absolute;
+  display: inline-block;
+  font-family: 'Didact Gothic';
+  width: 200px;
+  padding: 0px;
+  margin-top: 130px;
+  font-size: 20px;
+  font-weight: bold;
+  text-align: center;
+  align-content: center;
 }

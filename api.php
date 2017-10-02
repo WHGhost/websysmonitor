@@ -43,6 +43,8 @@
       foreach($line as $key => $element){
         $el[$firstline[$key]] = trim($element);
       }
+      $el["Size"] *= 1024;
+      $el["Used"] *= 1024;
       array_push($swapinfo, $el);
     }
     return  $swapinfo;

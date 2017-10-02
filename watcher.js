@@ -50,15 +50,23 @@ function update(){
   if(swapUsed < 0) swapUsed = 0;
   var swapUsage = swapUsed / swapTotal * 100;
 
+  setTextContentAllByClass("memometre-usage", parseInt(int(ramUsage)) + "%");
+  setTextContentAllByClass("memometre-used", bytesToHumanString(ramTotal - ramFree))
+  setTextContentAllByClass("memometre-total", bytesToHumanString(ramTotal))
+
+  setTextContentAllByClass("swapometre-usage", parseInt(int(swapUsage)) + "%");
+  setTextContentAllByClass("swapometre-used", bytesToHumanString(swapUsed))
+  setTextContentAllByClass("swapometre-total", bytesToHumanString(swapTotal))
+  
   for(var i = 0; i<ramwatchers.length; i++){
     watcher = ramwatchers[i];
-    watcher.getElementsByClassName("memometre-text")[0].textContent = int(ramUsage);
-    drawGauge(watcher.getElementsByClassName("memometre-jauge")[0], int(ramUsage), 80);
+    //watcher.getElementsByClassName()[0].textContent = int(ramUsage);
+    drawGauge(watcher.getElementsByClassName("memometre-gauge")[0], int(ramUsage), 80);
   }
   for(var i = 0; i<swapwatchers.length; i++){
     watcher = swapwatchers[i];
-    watcher.getElementsByClassName("swapometre-text")[0].textContent = int(swapUsage);
-    drawGauge(watcher.getElementsByClassName("swapometre-jauge")[0], int(swapUsage), 80);
+    //watcher.getElementsByClassName("swapometre-text")[0].textContent = int(swapUsage);
+    drawGauge(watcher.getElementsByClassName("swapometre-gauge")[0], int(swapUsage), 80);
   }
 }
 
@@ -87,21 +95,28 @@ function drawGauge(canv, x, high){
   ctx.fill();
 }
 
+function setTextContentAllByClass(className, str){
+  var els = document.getElementsByClassName(className);
+  for(var i=0; i<els.length; i++){
+    els[i].textContent = str;
+  }
+}
+
+/*Takes a byte count and translate it to something human readable. */
+function bytesToHumanString(b){
+  var units = ["B", "kB", "mB", "gB", "tB"];
+  var uniti = 0;
+  while(b >= 1024){
+    uniti++;
+    b /= 1024;
+  }
+  if(uniti>units.length - 1) uniti = units.length -1;
+  return parseFloat(b.toFixed(2)) + units[uniti];
+}
+
 /* Everytghing is in the name */
 function setup(){
   updateData();
-  var ramwatchers = document.getElementsByClassName("ram-watcher")
-  var swapwatchers = document.getElementsByClassName("swap-watcher")
-  for(var i = 0; i<ramwatchers.length; i++){
-    watcher = ramwatchers[i]
-    watcher.innerHTML += "<canvas width=\"200\" height=\"200\" class=\"memometre-jauge\"></canvas>"
-    watcher.innerHTML += "</canvas><span class=\"memometre-text\"></span>"
-  }
-  for(var i = 0; i<swapwatchers.length; i++){
-    watcher = swapwatchers[i]
-    watcher.innerHTML += "<canvas width=\"200\" height=\"200\" class=\"swapometre-jauge\"></canvas>"
-    watcher.innerHTML += "</canvas><span class=\"swapometre-text\"></span>"
-  }
 }
 
 setup();
