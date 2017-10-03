@@ -1,15 +1,11 @@
-<!DOCTYPE HTML>
-<html>
-
-    <head>
-        <title>System Monitor</title>
-        <link rel="stylesheet" type="text/css" href="websysmon.css">
-        <link href='https://fonts.googleapis.com/css?family=Didact Gothic' rel='stylesheet'>
-    </head>
-    <body>
-      <header>
-        <h1>System Monitor</h1>
-      </header>
+<?php
+  session_start();
+  if(!isset($_SESSION["login"])){
+    header("Location: login.php");
+    die();
+  }
+  require_once 'header.php';
+?>
       <section class="memory-box">
         <h5 class="box-name">Memory information:</h2>
         <div class="ram-watcher" width=200 height=200>
@@ -29,5 +25,4 @@
       </section>
 
         <script type="text/javascript" src="watcher.js"></script>
-    </body>
-</html>
+<?php require_once 'footer.php'; ?>

@@ -19,6 +19,54 @@ h1{
   padding: 20px;
   margin: 0px;
 }
+
+footer{
+  position:fixed;
+  left: 0px;
+  bottom: 0px;
+  padding: 5px;
+  text-align: center;
+  font-size: 14px;
+  color: #AAAAAA;
+  width: 100%;
+  background-color: #444444;
+}
+
+.login-box{
+  background-color: #FFFFFF;
+  display: block;
+  align-self: center;
+  text-align: center;
+  padding: 20px;
+  margin-top: 10%;
+  margin-left: auto;
+  margin-right: auto;
+  width: 70%;
+  max-width: 400px;
+  border: 3px solid #444444;
+}
+
+.invalid-box{
+  background-color: #AA0000;
+  display: block;
+  align-self: center;
+  text-align: center;
+  padding: 20px;
+  margin-top: 20px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 70%;
+  max-width: 350px;
+  border: 3px solid #444444;
+  color: #FFFFFF;
+}
+
+.login-title{
+  margin-bottom: 10px;
+  margin-top: 0px;
+  padding: 10px;
+  background-color: #00AAAAAA;
+}
 .memory-box{
   width: 400px;
   height: 300px;

@@ -1,5 +1,10 @@
 <?php
+  session_start();
 
+  if(!(isset($_SESSION['login']) && $_SESSION['login'])){
+    http_response_code(403);
+    die();
+  }
   /* Reads /proc/meminfo and returns it's content as an array, with the values in bytes. */
   function getRam(){
     /*
