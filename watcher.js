@@ -42,7 +42,7 @@ function update(){
   /* Data processing */
   var mem = data['mem'];
   var ramTotal = mem['MemTotal'];
-  var ramFree = mem['MemFree'];
+  var ramFree = mem['MemAvailable'];
   var ramUsage = (ramTotal - ramFree) / ramTotal * 100
   var swap = data['swap'][0];                                         //TODO Support multiple swaps
   var swapTotal = swap['Size'];
@@ -57,7 +57,7 @@ function update(){
   setTextContentAllByClass("swapometre-usage", parseInt(int(swapUsage)) + "%");
   setTextContentAllByClass("swapometre-used", bytesToHumanString(swapUsed))
   setTextContentAllByClass("swapometre-total", bytesToHumanString(swapTotal))
-  
+
   for(var i = 0; i<ramwatchers.length; i++){
     watcher = ramwatchers[i];
     //watcher.getElementsByClassName()[0].textContent = int(ramUsage);

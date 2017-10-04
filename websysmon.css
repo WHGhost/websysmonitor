@@ -32,6 +32,14 @@ footer{
   background-color: #444444;
 }
 
+a{
+  color: #AAAAAA;
+}
+
+footer > a:hoover{
+  color: #AAAAAA;
+}
+
 .login-box{
   background-color: #FFFFFF;
   display: block;
