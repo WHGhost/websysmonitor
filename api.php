@@ -13,6 +13,7 @@
     $data = explode("\n", file_get_contents("/proc/meminfo"));
     $meminfo = array();
     foreach ($data as $line) {
+      if($line === ''){continue;} // Just to avoid a Warnin on the last line which is a vois string
       list($key, $val) = explode(":", $line);
       $val = trim($val);
       if(preg_match('/[0-9]* kB$/', $val)){
