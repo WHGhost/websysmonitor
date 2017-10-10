@@ -3,8 +3,11 @@
 
   $invalid = false;
 
+  include_once "config.php";
+
+  if(!$REQUIRE_LOGIN) $_SESSION['login'] = true;
+
   if(isset($_POST['password'])){
-    include_once "config.php";
     if(hash('sha256', $_POST['password']) === $passhash){
       $_SESSION['login'] = true;
     }else{
@@ -16,7 +19,7 @@
     header("Location: index.php");
     die();
   }
-  require_once 'header.php';
+  require_once 'header.html';
 ?>
   <section class="login-box">
     <h5 class="login-title">Please login:</h5>
@@ -31,5 +34,5 @@
     </section>
   <?php } ?>
 <?php
-  require_once 'footer.php';
+  require_once 'footer.html';
 ?>
