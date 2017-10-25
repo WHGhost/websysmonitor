@@ -91,7 +91,7 @@
       $cpu['bogomips'] = (float)$cpu['bogomips'];
       $cpu['cache_alignment'] = (int)$cpu['cache_alignment'];
       $cpu['apicid'] = (int)$cpu['apicid'];
-      $cpu['freq_current'] = (float)$cpu['cpu_mhz'];
+      $cpu['freq_current'] = (float)$cpu['cpu_mhz'] * 1000;
       unset($cpu['cpu_mhz']);
       $cpu['freq_max'] = (float)file_get_contents("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq");
       $cpu['freq_min'] = (float)file_get_contents("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_min_freq");;
