@@ -57,6 +57,49 @@
   }
 
 
+  function getCpu(){
+    $data = explode("\n\n", file_get_contents("/proc/cpuinfo"));
+    $cpus = array();
+    foreach ($data as $block) {
+      if($block === ''){continue;} // Just to avoid a Warning on the last line which is a vois string
+      $cpu = Array();
+      $cpu_data = explode("\n", $block);
+      foreach ($cpu_data as $line) {
+        if($line === ''){continue;} // Just to avoid a Warning on the last line which is a vois string
+        list($key, $val) = explode(":", $line);
+        $val = trim($val);
+        $cpu[strtolower(str_replace(' ', '_', trim($key)))] = $val;
+      }
+
+      $cpu['processor'] = (int)$cpu['processor'];
+      $cpu['stepping'] = (int)$cpu['stepping'];
+      $cpu['core_id'] = (int)$cpu['core_id'];
+      $cpu['cache_size'] = (int)trim(str_replace('KB', '', $cpu['cache_size'])) * 1024;
+      $cpu['physical_id'] = (int)$cpu['physical_id'];
+      $cpu['siblings'] = (int)$cpu['siblings'];
+      $cpu['cpu_cores'] = (int)$cpu['cpu_cores'];
+      $cpu['apicid'] = (int)$cpu['apicid'];
+      $cpu['initial_apicid'] = (int)$cpu['initial_apicid'];
+      if($cpu['fpu_exception'] === "yes") $cpu['fpu_exception'] = true;
+      else $cpu['fpu_exception'] = false;
+      if($cpu['fpu'] === "yes") $cpu['fpu'] = true;
+      else $cpu['fpu'] = false;
+      $cpu['cpuid_level'] = (int)$cpu['cpuid_level'];
+      if($cpu['wp'] === "yes") $cpu['wp'] = true;
+      else $cpu['wp'] = false;
+      $cpu['flags'] = explode(" ", $cpu['flags']);
+      $cpu['bogomips'] = (float)$cpu['bogomips'];
+      $cpu['cache_alignment'] = (int)$cpu['cache_alignment'];
+      $cpu['apicid'] = (int)$cpu['apicid'];
+      $cpu['freq_current'] = (float)$cpu['cpu_mhz'];
+      unset($cpu['cpu_mhz']);
+      $cpu['freq_max'] = (float)file_get_contents("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq");
+      $cpu['freq_min'] = (float)file_get_contents("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_min_freq");;
+
+      array_push($cpus, $cpu);
+    }
+    return $cpus;
+  }
 
   $json = array();
   foreach($_GET as $key => $val){
@@ -65,6 +108,17 @@
       $json['mem'] = getRam();
     }else if($key === "swap"){
       $json['swap'] = getSwap();
+    }else if($key === "cpu"){
+      $json['cpu'] = getCpu();
+    }else if($key === "cpu_s"){
+      $cpus = getCpu();
+      $short_cpus = array();
+      foreach($cpus as $cpu_id => $cpu){
+        $short_cpus[$cpu_id] = array('freq_max'=>$cpu['freq_max'],
+                                    'freq_min'=>$cpu['freq_min'],
+                                    'freq_current'=>$cpu['freq_current']);
+      }
+      $json['cpu_s'] = $short_cpus;
     }else{
       http_response_code(400);
       die();
