@@ -7,6 +7,7 @@ body{
   margin: 0px;
   font-family: 'Didact Gothic';
   background: #555555;
+  align-content: center;
 }
 
 header{
@@ -35,6 +36,14 @@ footer{
 
 a{
   color: #AAAAAA;
+}
+
+section{
+  display: block;
+  width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 40px;
 }
 
 footer > a:hoover{
@@ -80,11 +89,21 @@ footer > a:hoover{
   width: 400px;
   height: 300px;
   padding: 20px;
-  align-content: center;
-  display: inline-block;
   border-style: solid;
   border-color: #555555;
   background-color: #FFFFFF;
+  display: inline-block;
+}
+
+.cpu-box{
+  width: 500px;
+  height: 300px;
+  padding: 20px;
+  border-style: solid;
+  border-color: #555555;
+  background-color: #FFFFFF;
+  align-self: left;
+  display: inline-block;
 }
 
 .box-name{
@@ -98,13 +117,15 @@ footer > a:hoover{
 .ram-watcher{
   width: 200px;
   height: 200px;
-  display: inline-block;
+  display: inline;
 }
 
 .swap-watcher{
   width: 200px;
   height: 200px;
   display: inline;
+  position: relative;
+  right: -200px;
 }
 
 .gauge-center-text{
