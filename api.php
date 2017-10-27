@@ -1,4 +1,7 @@
 <?php
+
+  include_once "config.php";
+
   session_start();
 
   if(!(isset($_SESSION['login']) && $_SESSION['login'])){
@@ -61,11 +64,11 @@
     $data = explode("\n\n", file_get_contents("/proc/cpuinfo"));
     $cpus = array();
     foreach ($data as $block) {
-      if($block === ''){continue;} // Just to avoid a Warning on the last line which is a vois string
+      if($block === ''){continue;} // Just to avoid a Warning on the last line which is a void string
       $cpu = Array();
       $cpu_data = explode("\n", $block);
       foreach ($cpu_data as $line) {
-        if($line === ''){continue;} // Just to avoid a Warning on the last line which is a vois string
+        if($line === ''){continue;} // Just to avoid a Warning on the last line which is a void string
         list($key, $val) = explode(":", $line);
         $val = trim($val);
         $cpu[strtolower(str_replace(' ', '_', trim($key)))] = $val;
@@ -93,32 +96,64 @@
       $cpu['apicid'] = (int)$cpu['apicid'];
       $cpu['freq_current'] = (float)$cpu['cpu_mhz'] * 1000;
       unset($cpu['cpu_mhz']);
-      $cpu['freq_max'] = (float)file_get_contents("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq");
-      $cpu['freq_min'] = (float)file_get_contents("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_min_freq");;
+      $id = $cpu['processor'];
+      $cpu['freq_max'] = (float)file_get_contents("/sys/devices/system/cpu/cpu$id/cpufreq/cpuinfo_max_freq"); //TODO Use the proper cpu
+      $cpu['freq_min'] = (float)file_get_contents("/sys/devices/system/cpu/cpu$id/cpufreq/cpuinfo_min_freq");;
 
       array_push($cpus, $cpu);
     }
     return $cpus;
   }
 
+  function getCPULoad(){
+    $cpu = array();
+    $stat1 = explode("\n", file_get_contents('/proc/stat'));
+    global $CPU_LOAD_SLEEP;
+    usleep($CPU_LOAD_SLEEP); //Sleep TODO It would be nice to use a DB for this to avoid losing time
+    $stat2 = explode("\n", file_get_contents('/proc/stat'));
+    foreach($stat2 as $line_no => $line){
+      $line = explode(" ", $line);
+      if(preg_match("/cpu[0-9]+/", $line[0])){
+        $line2 = explode(" ", $stat1[$line_no]);
+        $user_time = (int)$line[1] - (int)$line2[1];
+        $nice_time = (int)$line[2] - (int)$line2[2];
+        $kernel_time = (int)$line[3] - (int)$line2[3];
+        $idle_time = (int)$line[4] - (int)$line2[4];
+        $io_time = (int)$line[5] - (int)$line2[5];
+        $irq_time = (int)$line[6] - (int)$line2[6];
+        $softirq_time = (int)$line[7] - (int)$line2[7];
+        $steal_time = (int)$line[8] - (int)$line2[8];
+        $guest_time = (int)$line[9] - (int)$line2[9];
+        $guest_nice_time = (int)$line[10] - (int)$line2[10]; //TODO Older kernels misses line, ckeck for them
+        $total_time = $user_time + $nice_time + $kernel_time + $idle_time +
+                      $io_time + $irq_time + $softirq_time + $steal_time +
+                      $guest_time + $guest_nice_time;
+        array_push($cpu, ($total_time - $idle_time) * 100 / $total_time);
+      }
+    }
+    return $cpu;
+  }
+
   $json = array('date' => microtime(true));
   foreach($_GET as $key => $val){
-
-    if($key === 'mem'){             //Memory hardware information
+    if($key === 'cpu_load'){
+      $json['cpu_load'] = getCPULoad();
+      $json['date'] = microtime(true);
+    }else if($key === 'mem'){                  //Memory hardware information
       $json['mem'] = getRam();
-    }else if($key === 'mem_l'){     //Memory load information
+    }else if($key === 'mem_usage'){      //Memory usage information
       $mem = getRam();
-      $json['mem_l'] = ['MemTotal'=> $mem['MemTotal'],
+      $json['mem_usage'] = ['MemTotal'=> $mem['MemTotal'],
                         'MemFree'=>$mem['MemFree'],
                         'MemAvailable'=>$mem['MemAvailable'],
                         'SwapTotal'=>$mem['SwapTotal'],
                         'SwapFree'=>$mem['SwapFree'],
                         'SwapCached'=>$mem['SwapCached']];
-    }else if($key === 'swap'){      //Swap hardware information
+    }else if($key === 'swap'){       //Swap hardware information
       $json['swap'] = getSwap();
-    }else if($key === 'cpu'){       //CPU hardware information
+    }else if($key === 'cpu'){        //CPU hardware information
       $json['cpu'] = getCpu();
-    }else if($key === 'cpu_l'){     //CPU load information
+    }else if($key === 'cpu_clocks'){ //CPU clock speeds information
       $cpus = getCpu();
       $short_cpus = array();
       foreach($cpus as $cpu_id => $cpu){
@@ -126,7 +161,7 @@
                                     'freq_min'=>$cpu['freq_min'],
                                     'freq_current'=>$cpu['freq_current']);
       }
-      $json['cpu_l'] = $short_cpus;
+      $json['cpu_clocks'] = $short_cpus;
     }else{
       http_response_code(400);
       die();

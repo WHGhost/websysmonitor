@@ -13,8 +13,8 @@ function update(){
   var toUpdate = [];
   var ramwatchers = document.getElementsByClassName("ram-watcher")
   var swapwatchers = document.getElementsByClassName("swap-watcher")
-  if(ramwatchers.length > 0 || swapwatchers.length > 0) toUpdate.push('mem_l');
-  if(cpuGraphs.length > 0) toUpdate.push('cpu_l');
+  if(ramwatchers.length > 0 || swapwatchers.length > 0) toUpdate.push('mem_usage');
+  if(cpuGraphs.length > 0) toUpdate.push('cpu_load');
   var args = "";
   for(var i=0; i<toUpdate.length; i++) args += toUpdate[i] + '&';
   var request = new XMLHttpRequest();
@@ -31,8 +31,8 @@ function update(){
         if(ramwatchers.length > 0){
 
           //Compute data
-          let ramTotal = response['mem_l']['MemTotal'];
-          let ramFree = response['mem_l']['MemAvailable'];
+          let ramTotal = response['mem_usage']['MemTotal'];
+          let ramFree = response['mem_usage']['MemAvailable'];
           let ramUsage = (ramTotal - ramFree) / ramTotal * 100
 
           //Update texts TODO that should be handled by the gauge object
@@ -51,9 +51,9 @@ function update(){
         if(swapwatchers.length > 0){
 
           //Compute data
-          let swapTotal = response['mem_l']['SwapTotal'];
+          let swapTotal = response['mem_usage']['SwapTotal'];
           if(swapTotal != 0){
-            let swapUsed = response['mem_l']['SwapCached'];
+            let swapUsed = response['mem_usage']['SwapCached'];
             let swapUsage = swapUsed / swapTotal * 100;
 
             //Update text
@@ -72,18 +72,10 @@ function update(){
 
         //CPU part
         if(cpuGraphs.length > 0){
-          /* Data processing */
-          let cpus = response['cpu_l'];
-          let cpuUsage = [];
-          for(let id=0; id<cpus.length; id++){
-            let cpu=cpus[id];
-            cpuUsage.push((cpu['freq_current']) * 100 / (cpu['freq_max']));
-          }
-
           //Update graphs
+          let cpuUsage = response['cpu_load'];
           for(let i = 0; i<cpuGraphs.length; i++){
-            var graph = cpuGraphs[i];
-            //for(let id=0; id<cpuUsage.length; id++) graph.addPointNow(id, cpuUsage[id]);
+            let graph = cpuGraphs[i];
             for(let id=0; id<cpuUsage.length; id++) graph.addPoint(id, new Date(response['date'] * 1000), cpuUsage[id]);
           }
         }
@@ -151,6 +143,7 @@ class Graph{
     ctx.beginPath();
     for(let i=0; i<this.lines.length; i++){
       let line = this.lines[i];
+      if(line.points.length < 1) continue;
       ctx.moveTo(
         line.points[0][0] / this.maxX * this.canvas.width,
         this.canvas.height - int(line.points[0][1] / this.maxY * this.canvas.height));
