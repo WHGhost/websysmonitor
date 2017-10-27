@@ -101,7 +101,7 @@
     return $cpus;
   }
 
-  $json = array();
+  $json = array('date' => microtime(true));
   foreach($_GET as $key => $val){
 
     if($key === 'mem'){             //Memory hardware information
