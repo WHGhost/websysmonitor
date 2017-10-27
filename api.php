@@ -104,13 +104,21 @@
   $json = array();
   foreach($_GET as $key => $val){
 
-    if($key === "mem"){
+    if($key === 'mem'){             //Memory hardware information
       $json['mem'] = getRam();
-    }else if($key === "swap"){
+    }else if($key === 'mem_l'){     //Memory load information
+      $mem = getRam();
+      $json['mem_l'] = ['MemTotal'=> $mem['MemTotal'],
+                        'MemFree'=>$mem['MemFree'],
+                        'MemAvailable'=>$mem['MemAvailable'],
+                        'SwapTotal'=>$mem['SwapTotal'],
+                        'SwapFree'=>$mem['SwapFree'],
+                        'SwapCached'=>$mem['SwapCached']];
+    }else if($key === 'swap'){      //Swap hardware information
       $json['swap'] = getSwap();
-    }else if($key === "cpu"){
+    }else if($key === 'cpu'){       //CPU hardware information
       $json['cpu'] = getCpu();
-    }else if($key === "cpu_s"){
+    }else if($key === 'cpu_l'){     //CPU load information
       $cpus = getCpu();
       $short_cpus = array();
       foreach($cpus as $cpu_id => $cpu){
@@ -118,7 +126,7 @@
                                     'freq_min'=>$cpu['freq_min'],
                                     'freq_current'=>$cpu['freq_current']);
       }
-      $json['cpu_s'] = $short_cpus;
+      $json['cpu_l'] = $short_cpus;
     }else{
       http_response_code(400);
       die();
