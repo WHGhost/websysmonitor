@@ -148,6 +148,15 @@ class Graph{
     ctx.fillStyle = "#FFFFFF";
     ctx.fillRect(0,0,this.canvas.width, this.canvas.height);
     ctx.fill();
+    ctx.strokeStyle = '#AAAAAA';
+    let levels = [this.canvas.height/2, this.canvas.height/4, this.canvas.height/4*3];
+    ctx.lineWidth=1;
+    for(let l in levels){
+      ctx.beginPath();
+      ctx.moveTo(0, levels[l]);
+      ctx.lineTo(this.canvas.width, levels[l]);
+      ctx.stroke();
+    }
     ctx.lineWidth=2;
     for(let i=0; i<this.lines.length; i++){
       let line = this.lines[i];
