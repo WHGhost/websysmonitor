@@ -3,6 +3,9 @@ var data = {};
 
 var cpuGraphs = [];
 
+//Some premade colors for graphs
+var graphColors = ['#2e92b3', '#b32e68', '#2eb349', '#752eb3', '#e09636', '#4436e0', '#b32e2e', '#98b32e', '#41e036'];
+
 /* Converts a float to an int */
 function int(x) {
     return Math[this < 0 ? 'ceil' : 'floor'](x);
@@ -126,7 +129,8 @@ class Graph{
     this.lines = [];
   }
 
-  addLine(id, color){
+  addLine(color){
+    if(color == null) color = graphColors[this.lines.length % graphColors.length];
     return this.lines.push({'points':[], 'color': color}) - 1;
   }
 
@@ -135,14 +139,20 @@ class Graph{
     this.lines[id].points.sort(function(p1, p2){return p1[0] - p2[0]});
   }
 
+  setLineColor(id){
+    this.lines[id].color = color;
+  }
+
   draw(){
     let ctx = this.canvas.getContext('2d');
     ctx.fillStyle = "#FFFFFF";
     ctx.fillRect(0,0,this.canvas.width, this.canvas.height);
     ctx.fill();
-    ctx.beginPath();
+    ctx.lineWidth=2;
     for(let i=0; i<this.lines.length; i++){
       let line = this.lines[i];
+      ctx.strokeStyle = line.color;
+      ctx.beginPath();
       if(line.points.length < 1) continue;
       ctx.moveTo(
         line.points[0][0] / this.maxX * this.canvas.width,
