@@ -48,7 +48,6 @@ footer > a:hoover{
 
 .gauge-canvas{
   position: absolute;
-  z-index: -1;
 }
 
 .login-box{
@@ -151,6 +150,7 @@ footer > a:hoover{
 }
 
 .gauge-bottom-text{
+  position: relative;
   display: inline-block;
   width: 200px;
   padding: 0px;
