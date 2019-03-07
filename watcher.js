@@ -2,6 +2,8 @@
 var data = {};
 
 var cpuGraphs = [];
+var ramGauges = [];
+var swapGauges = [];
 
 //Some premade colors for graphs
 var graphColors = ['#2e92b3', '#b32e68', '#2eb349', '#752eb3', '#e09636', '#4436e0', '#b32e2e', '#98b32e', '#41e036'];
@@ -14,9 +16,7 @@ function int(x) {
 /* Updates the pages componments and updates the needed data */
 function update(){
   var toUpdate = [];
-  var ramwatchers = document.getElementsByClassName("ram-watcher")
-  var swapwatchers = document.getElementsByClassName("swap-watcher")
-  if(ramwatchers.length > 0 || swapwatchers.length > 0) toUpdate.push('mem_usage');
+  if(ramGauges.length > 0 || swapGauges.length > 0) toUpdate.push('mem_usage');
   if(cpuGraphs.length > 0) toUpdate.push('cpu_load');
   var args = "";
   for(var i=0; i<toUpdate.length; i++) args += toUpdate[i] + '&';
@@ -27,53 +27,7 @@ function update(){
       if (request.status === 200) {
         let response = JSON.parse(request.responseText)
 
-        let ramwatchers = document.getElementsByClassName("ram-watcher");
-        let swapwatchers = document.getElementsByClassName("swap-watcher");
-
-        //Ram part
-        if(ramwatchers.length > 0){
-
-          //Compute data
-          let ramTotal = response['mem_usage']['MemTotal'];
-          let ramFree = response['mem_usage']['MemAvailable'];
-          let ramUsage = (ramTotal - ramFree) / ramTotal * 100
-
-          //Update texts TODO that should be handled by the gauge object
-          setTextContentAllByClass("memometre-usage", parseInt(int(ramUsage)) + "%");
-          setTextContentAllByClass("memometre-used", bytesToHumanString(ramTotal - ramFree))
-          setTextContentAllByClass("memometre-total", bytesToHumanString(ramTotal))
-
-          //Update graphics
-          for(let i = 0; i<ramwatchers.length; i++){
-            let watcher = ramwatchers[i];
-            drawGauge(watcher.getElementsByClassName("memometre-gauge")[0], int(ramUsage), 80);
-          }
-        }
-
-        //Swap part
-        if(swapwatchers.length > 0){
-
-          //Compute data
-          let swapTotal = response['mem_usage']['SwapTotal'];
-          if(swapTotal != 0){
-            let swapUsed = response['mem_usage']['SwapCached'];
-            let swapUsage = swapUsed / swapTotal * 100;
-
-            //Update text
-            setTextContentAllByClass("swapometre-usage", parseInt(int(swapUsage)) + "%");
-            setTextContentAllByClass("swapometre-used", bytesToHumanString(swapUsed))
-            setTextContentAllByClass("swapometre-total", bytesToHumanString(swapTotal))
-
-            //Update graphics
-            for(var i = 0; i<swapwatchers.length; i++){
-              var watcher = swapwatchers[i];
-              drawGauge(watcher.getElementsByClassName("swapometre-gauge")[0], int(swapUsage), 80);
-            }
-          }
-
-        }
-
-        //CPU part
+        /* CPU Graphs */
         if(cpuGraphs.length > 0){
           //Update graphs
           let cpuUsage = response['cpu_load'];
@@ -81,6 +35,21 @@ function update(){
             let graph = cpuGraphs[i];
             for(let id=0; id<cpuUsage.length; id++) graph.addPoint(id, new Date(response['date'] * 1000), cpuUsage[id]);
           }
+	}
+
+        /* Ram Gauges */
+        if(ramGauges.length > 0) {
+          let ramTotal = response['mem_usage']['MemTotal'];
+          let ramFree = response['mem_usage']['MemAvailable'];
+          let ramUsage = ramTotal - ramFree;
+          for(let i=0; i<ramGauges.length; i++) ramGauges[i].value = ramUsage;
+        }
+
+        /* Swap Gauges */
+        if(swapGauges.length > 0) {
+          let swapTotal = response['mem_usage']['SwapTotal'];
+          let swapUsage = swapTotal != 0 ? response['mem_usage']['SwapCached'] : 0;
+          for(let i=0; i<swapGauges.length; i++) swapGauges[i].value = swapUsage;
         }
       } else {
           console.log('Failed to communicate with API: ' + request.status);
@@ -93,33 +62,106 @@ function update(){
 function draw(){
   //Graphs
   for(let i = 0; i<cpuGraphs.length; i++) cpuGraphs[i].draw();
-}
-/* Draws a gauge on the given canvas, with filled up to x%, being red after high% */
-function drawGauge(canv, x, high){
-  var ctx = canv.getContext("2d");
-  var m = canv.width / 2;
-  ctx.beginPath();
-  ctx.fillStyle = "#FFFFFF";
-  ctx.fillRect(0,0,canv.width, canv.height);
-  ctx.fillStyle = "#EEEEEE";
-  ctx.arc(m, m, m - m/10 - 5, 0, 2*Math.PI);
-  ctx.arc(m, m, m - m/10 - 15, 2*Math.PI, 0, true);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(m, m, m - m/10 - 1, Math.PI * 1.5, (Math.PI * 1.5) + x/50*Math.PI);
-  ctx.arc(m, m, m - m/10 - 19, (Math.PI * 1.5) + x/50*Math.PI, 1.5*Math.PI, true);
-  ctx.fillStyle = "#CC0000";
-  ctx.fill();
-  ctx.beginPath();
-  var n = high;
-  if(x < high) n=x;
-  ctx.arc(m, m, m - m/10, Math.PI * 1.5, (Math.PI * 1.5) + n/50*Math.PI);
-  ctx.arc(m, m, m - m/10 - 20, (Math.PI * 1.5) + n/50*Math.PI, 1.5*Math.PI, true);
-  ctx.fillStyle = "#00AAAA";
-  ctx.fill();
+  for(let i = 0; i<ramGauges.length; i++) ramGauges[i].draw();
+  for(let i = 0; i<swapGauges.length; i++) swapGauges[i].draw();
 }
 
-class Graph{
+class Gauge {
+
+  constructor(element, min, max, high, unit) {
+    this.element = element;
+    this.element.classList.add("gauge");
+    this.min = min;
+    this.max = max;
+    this.high = high;
+    this.value = 0;
+    this.unit = unit;
+    this.lastRenderValue = NaN;
+
+    /* Create the canvas */
+    this.canvas = document.createElement("canvas");
+    this.canvas.width = element.getAttribute('width');
+    this.canvas.height = element.getAttribute('height');
+    this.canvas.classList.add("gauge-canvas");
+    element.appendChild(this.canvas);
+
+    /* Create the text nodes */
+    this.top_text = document.createElement("span");
+    this.center_text = document.createElement("span");
+    this.bottom_text = document.createElement("span");
+    this.top_text.classList.add("gauge-top-text");
+    this.center_text.classList.add("gauge-center-text");
+    this.bottom_text.classList.add("gauge-bottom-text");
+    this.bottom_text.innerText = this.formatText(this.max);
+    this.element.appendChild(this.top_text);
+    this.element.appendChild(this.center_text);
+    this.element.appendChild(this.bottom_text);
+  }
+
+  draw(){
+    if(this.lastRenderValue === this.value) return; //Avoid rendering when unecessary
+    let ctx = this.canvas.getContext("2d");
+    let m = this.canvas.width / 2;
+    let x = (this.value - this.min) / (this.max - this.min) * 100;
+    let high = (this.high -this.min) / (this.max - this.min) * 100;
+
+    /* Update the text nodes */
+    this.setTopText(this.formatText(this.value));
+    this.setCenterText("" + int(x) + "%");
+
+    ctx.beginPath();
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    ctx.fillStyle = "#EEEEEE";
+    ctx.arc(m, m, m - m/10 - 5, 0, 2*Math.PI);
+    ctx.arc(m, m, m - m/10 - 15, 2*Math.PI, 0, true);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(m, m, m - m/10 - 1, Math.PI * 1.5, (Math.PI * 1.5) + x/50*Math.PI);
+    ctx.arc(m, m, m - m/10 - 19, (Math.PI * 1.5) + x/50*Math.PI, 1.5*Math.PI, true);
+    ctx.fillStyle = "#CC0000";
+    ctx.fill();
+    ctx.beginPath();
+    let n = high;
+    if(x < high) n=x;
+    ctx.arc(m, m, m - m/10, Math.PI * 1.5, (Math.PI * 1.5) + n/50*Math.PI);
+    ctx.arc(m, m, m - m/10 - 20, (Math.PI * 1.5) + n/50*Math.PI, 1.5*Math.PI, true);
+    ctx.fillStyle = "#00AAAA";
+    ctx.fill();
+    this.lastRenderValue = this.value;
+  }
+
+  setTopText(val) {
+    this.top_text.innerText = val;
+  }
+  
+  setCenterText(val) {
+    this.center_text.innerText = val;
+  }
+
+  setBottomText(val) {
+    this.bottom_text.innerText = val;
+  }
+
+  formatText(val) {
+    return "" + val + this.unit;
+  }
+
+}
+
+class MemoryGauge extends Gauge {
+
+  constructor(element, min, max, high) {
+    super(element, min, max, high, 'B');
+  }
+
+  formatText(val){
+    return bytesToHumanString(val);
+  }
+
+}
+
+class Graph {
   constructor(canvas, minX, maxX, minY, maxY){
     this.canvas = canvas;
     this.maxX = maxX;
@@ -211,13 +253,6 @@ class TimeGraph extends Graph{
 }
 
 
-function setTextContentAllByClass(className, str){
-  var els = document.getElementsByClassName(className);
-  for(var i=0; i<els.length; i++){
-    els[i].textContent = str;
-  }
-}
-
 /*Takes a byte count and translate it to something human readable. */
 function bytesToHumanString(b){
   var units = ["B", "kB", "mB", "gB", "tB"];
@@ -263,13 +298,36 @@ function init(){
     cpuGraphs.push(graph);
   }
 
+  let ramTotal = data['ram']['MemTotal'];
+  let swapTotal = data['swap'][0]['Size'];
+
+  /* Setting up the gauges */
+  let ramGaugeElements = document.getElementsByClassName("ram-gauge");
+  let swapGaugeElements = document.getElementsByClassName("swap-gauge");
+  for(let i=0; i<ramGaugeElements.length; i++)
+    ramGauges.push(new MemoryGauge(
+                         ramGaugeElements[i],
+	                 0,
+	                 ramTotal,
+	                 ramTotal * .9
+                       )
+                  );
+  for(let i=0; i<swapGaugeElements.length; i++)
+    swapGauges.push(new MemoryGauge(
+	                  swapGaugeElements[i],
+	                  0,
+	                  swapTotal,
+	                  swapTotal * .9
+                        )
+                   );
+
   //TODO It should all be object oriented
 
-  postinit();
+  postInit();
 
 }
 
-function postinit(){
+function postInit(){
   setInterval(update, 500);
   setInterval(draw, 100);
 }
