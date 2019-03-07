@@ -24,8 +24,8 @@
       
       <article class="cpu-box box">
         <h5 class="box-name">CPU Usage:</h5>
-        <canvas class="cpu-graph" width="500" height="230"></canvas>
-	<div class="cpu-usage">Usage text</div>
+        <div class="cpu-graph" width=500 height=200></div>
+	<div class="cpu-usage"><span class="usage-cpu-0"></span>Usage text</div>
       </article>
 
     </section>

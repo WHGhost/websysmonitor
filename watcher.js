@@ -162,13 +162,18 @@ class MemoryGauge extends Gauge {
 }
 
 class Graph {
-  constructor(canvas, minX, maxX, minY, maxY){
-    this.canvas = canvas;
+  constructor(element, minX, maxX, minY, maxY){
+    this.element = element;
+    this.canvas = document.createElement("canvas");
     this.maxX = maxX;
     this.minX = minX;
     this.maxY = maxY;
     this.minY = minY;
     this.lines = [];
+
+    this.canvas.width = this.element.getAttribute("width");
+    this.canvas.height = this.element.getAttribute("height");
+    this.element.appendChild(this.canvas);
   }
 
   addLine(color){
