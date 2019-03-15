@@ -164,13 +164,14 @@ class MemoryGauge extends Gauge {
 class Graph {
   constructor(element, minX, maxX, minY, maxY){
     this.element = element;
-    this.canvas = document.createElement("canvas");
     this.maxX = maxX;
     this.minX = minX;
     this.maxY = maxY;
     this.minY = minY;
     this.lines = [];
 
+    /* Create the canvas */
+    this.canvas = document.createElement("canvas");
     this.canvas.width = this.element.getAttribute("width");
     this.canvas.height = this.element.getAttribute("height");
     this.element.appendChild(this.canvas);
@@ -227,6 +228,23 @@ class TimeGraph extends Graph{
 
   constructor(canvas, duration, minY, maxY){
     super(canvas, 0, duration, minY, maxY);
+    
+    /* Create the value display area */
+    this.displayArea = document.createElement("div");
+    this.displayArea.classList.add("graph-value-box");
+    this.element.appendChild(this.displayArea);
+    this.valueDisplays = [];
+    this.lastUpdated_values = [];
+  }
+
+  addLine(line, color) {
+    let valueDisplay = document.createElement("span");
+    if(color == null) color = graphColors[this.lines.length % graphColors.length];
+    valueDisplay.style = "color: " + color + ";";
+    valueDisplay.classList.add("graph-value");
+    this.displayArea.appendChild(valueDisplay);
+    this.valueDisplays.push(valueDisplay);
+    super.addLine(line, color);
   }
 
   addPointNow(line, y){
@@ -252,13 +270,35 @@ class TimeGraph extends Graph{
           function(item) {return item[0] > min-10}
         );
       super.draw();
+
+      /* Text handling */
+      let flag = false;
+      for(let i=0; i<this.lastUpdatedValues; i++) {
+        if(lastValues[i] != line[this.lines.length - 1].points[i]) {
+          flag = true;
+	  break;
+        }
+      }
+      if(flag) return; /* Avoid updating the DOM when unecessary */
+      for(let i=0; i<this.lines.length; i++) {
+	let line = this.lines[i];
+	//TODO logs an error when nothing to draw yet
+	let val = line.points[line.points.length - 1][1];
+        this.valueDisplays[i].innerText = this.formatValue(int(val));
+      }
+      for(let i=0; i<this.last_updated_values; i++)
+        lastValues[i] = this.valueDisplays[i].innerText; 
     }
+  }
+
+  formatValue(val) {
+    return "" + val + "%";
   }
 
 }
 
 
-/*Takes a byte count and translate it to something human readable. */
+/* Takes a byte count and translate it to something human readable. */
 function bytesToHumanString(b){
   var units = ["B", "kB", "mB", "gB", "tB"];
   var uniti = 0;
@@ -286,7 +326,7 @@ function preInit(){
         data['cpu'] = response['cpu']
         init();
       } else {
-          console.log('Failed to communicate with API to get memory information: ' + request.status);
+          console.log("Failed to initialize, couldn't communicate with API: " + request.status);
       }
     }
   };

@@ -174,3 +174,12 @@ footer > a:hoover{
   align-content: center;
   background-color: #00BBBB;
 }
+
+.graph-value-box {
+  text-align: center;
+}
+
+.graph-value {
+  padding-left: 10px;
+  padding-right: 10px;
+}
