@@ -2,7 +2,7 @@
 A simple remote system monitor over http.
 Only Linux is supported (and you can hack a bit to make it work on Android)
 
-![Websysmonitor screenshot](https://imgur.com/zWuuQmv)
+![Websysmonitor screenshot](https://i.imgur.com/zWuuQmv.png)
 
 
 # Installation:
